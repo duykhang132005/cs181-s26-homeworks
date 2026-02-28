@@ -81,10 +81,83 @@ In this class, we will be exploring the question of ``how do we model the trend 
 
 \newpage
 
-
+\begin{mdframed}[backgroundcolor=blue!10, linewidth=1pt]
 \begin{solution}
-	Your solution here.
+    \textbf{Problem 1}: \\
+    1. If a line passes through both of these points, they are both solutions to the form $y = w_0 + w_1 x$. In order to write a system of linear equations, we can plug in the two points into the same template for the equation of a line:
+    \begin{align*}
+        y_1 &= w_0 + w_1 x_1 \\
+        y_2 &= w_0 + w_1 x_2
+    \end{align*}
+    We can solve for $w_0$ in the first equation and substitute it into the second equation:
+    \begin{align*}
+        w_0 &= y_1 - w_1 x_1 \\
+        y_2 &= (y_1 - w_1 x_1) + w_1 x_2 \\
+        y_2 - y_1 &= w_1 (x_2 - x_1) \\
+        w_1 &= \frac{y_2 - y_1}{x_2 - x_1}
+    \end{align*}
+    We can then substitute $w_1$ back into the equation for $w_0$:
+    \begin{align*}
+        w_0 &= y_1 - \frac{y_2 - y_1}{x_2 - x_1} x_1 \\
+        &= \frac{y_1 (x_2 - x_1) - (y_2 - y_1) x_1}{x_2 - x_1} \\
+        &= \frac{y_1 x_2 - y_2 x_1}{x_2 - x_1}
+    \end{align*}
+
+    \noindent Looking at the above, this makes sense because the equation for $w_1$ ended up being the slope by looking at the rate of change, and the equation for $w_0$ is the intercept of the line passing through the two points after taking away the impact of the slope. The two solved forms for $w_0$ and $w_1$ are:
+    \begin{align*}
+        w_0 &= \frac{y_1 x_2 - y_2 x_1}{x_2 - x_1} \\
+        w_1 &= \frac{y_2 - y_1}{x_2 - x_1}
+    \end{align*}
+
+    \medskip
+
+    \noindent2. We can rewrite the two equations from part (1) in matrix form as follows:
+    \[
+    \begin{bmatrix} y_1 \\ y_2 \end{bmatrix} =
+    \begin{bmatrix} 1 & x_1 \\ 1 & x_2 \end{bmatrix}
+    \begin{bmatrix} w_0 \\ w_1 \end{bmatrix}
+    \]
+    Each individual equation when multiplied out here corresponds to the equations we had: 
+    \[
+    \begin{aligned}
+    y_1 &= 1 \cdot w_0 + x_1 \cdot w_1
+    \qquad\qquad
+    y_2 &= 1 \cdot w_0 + x_2 \cdot w_1
+    \end{aligned}
+    \]
+    Thus, we have $\mathbf{y} = \begin{bmatrix} y_1 \\ y_2 \end{bmatrix}$, $\mathbf{X} = \begin{bmatrix} 1 & x_1 \\ 1 & x_2 \end{bmatrix}$, and $\mathbf{w} = \begin{bmatrix} w_0 \\ w_1 \end{bmatrix}$ to yield the same results.
 \end{solution}
+\end{mdframed}
+
+\begin{mdframed}[backgroundcolor=blue!10, linewidth=1pt]
+\begin{solution}
+    \textbf{Problem 1 (Continued)}: \\
+    3. In an algebaic sense, a unique solution for $\mathbf{w}$ exists if for every input, there is exactly one unique output for that input. This makes the transformation from input to output one-to-one. In the matrices world, one way that guarantees this is if the matrix $\mathbf{X}$ is invertible. Converting from the original equation $\mathbf{y} = \mathbf{X} \mathbf{w}$, we can manipulate under the assumption of invertibility to get:
+    \[ \mathbf{y} = \mathbf{X} \mathbf{w}\]
+    \[\mathbf{X}^{-1} \mathbf{y} = \mathbf{X}^{-1} \mathbf{X} \mathbf{w}\] 
+    \[\mathbf{X}^{-1} \mathbf{y} = \mathbf{I} \mathbf{w}\]
+    \[\mathbf{w} = \mathbf{X}^{-1} \mathbf{y}\]
+    It is important to note that for invertibility to happen, the data space must only yield 0 from the equation $\mathbf{X} \mathbf{v} = 0$ when $\mathbf{v} = 0$. In other words, the null space of $\mathbf{X}$ must only contain the zero vector. In our case, this means that $x_1 \neq x_2$, otherwise the two rows of $\mathbf{X}$ would be linearly dependent and thus not invertible. Thus, when $x_1 \neq x_2$ (so that we have a basis of the data space), we have a unique solution for $\mathbf{w}$ given by:
+    \[\mathbf{w} = \mathbf{X}^{-1} \mathbf{y}\]
+
+    \medskip
+    \noindent 4. Continuing from part (3), we can compute $\mathbf{X}^{-1}$ using the determinant and simplifying:
+    \[\mathbf{X}^{-1} = \frac{1}{(1)(x_2) - (1)(x_1)} \begin{bmatrix} x_2 & -x_1 \\ -1 & 1 \end{bmatrix} = \frac{1}{x_2 - x_1} \begin{bmatrix} x_2 & -x_1 \\ -1 & 1 \end{bmatrix}\]
+    Thus, we can compute $\mathbf{w}$:
+    \[\mathbf{w} = \mathbf{X}^{-1} \mathbf{y} = \frac{1}{x_2 - x_1} \begin{bmatrix} x_2 & -x_1 \\ -1 & 1 \end{bmatrix} \begin{bmatrix} y_1 \\ y_2 \end{bmatrix} = \frac{1}{x_2 - x_1} \begin{bmatrix} x_2 y_1 - x_1 y_2 \\ -y_1 + y_2 \end{bmatrix}\]
+    This yields:
+    \[w_0 = \frac{x_2 y_1 - x_1 y_2}{x_2 - x_1}, \quad w_1 = \frac{y_2 - y_1}{x_2 - x_1}\]
+    This matches exactly with our results from part 1. One advantage of phrasing the problem in terms of matrix notation is that it is easier to group both the relationship between $w_0$ and $w_1$ with the solution together. If we were to scale this to more dimensions, there's a set process on how to get there as opposed to having to derive the equations from scratch case by case.
+
+    \medskip
+
+    \noindent 5. The analytical expression for $\mathbf{w}$ derived in part 3 does not apply immediately to the case when $\mathcal{D}$ consists of more than two points. This is because when there are more than two points, the system of equations becomes overdetermined (more equations than unknowns). In such a case, there may not be a line that passes through all the points exactly. Instead, we would typically look for a line that minimizes the error (maybe using least squares) rather than one that fits all points perfectly. We basically run into an overfitting problem and more data does not necessarily mean better fitting data.
+
+    \medskip
+
+    \noindent 6. See the code displayed in the attached Jupyter Notebook file. The matrices used in there do reflect the matrix formulation derived above. The arbitrary numerical values chosen were $x_1 = 2$, $y_1 = 5$, $x_2 = 4$, and $y_2 = 6$. $\mathbf{w}$ ends up being \(\begin{bmatrix} 4 \\ 0.5 \end{bmatrix}\) for these values.
+\end{solution}
+\end{mdframed}
 
 \color{black}
 \newpage
@@ -116,10 +189,32 @@ $$y = f(x_1, x_2) = \exp\left(-(x_1 - 2)^2 - (x_2 - 1)^2 \right)$$
 
 \newpage
 
-
+\begin{mdframed}[backgroundcolor=blue!10, linewidth=1pt]
 \begin{solution}
-	Your solution here.
+	\textbf{Problem 2}: \\
+    \noindent 1. The plot of the height function is a downward-opening parabola, which indicates that there is a unique maximum point (see the end of this PDF). This is because the coefficient of the $x^2$ term is negative (-3), which means the parabola opens downwards, leading to a single peak (maximum) point at its vertex.
+
+    \medskip
+
+    \noindent 2. To find the maximum height, we can find the $x$ value at the vertex of the parabola using the formula $x = -\frac{b}{2a}$, where $a = -3$ and $b = 72$:
+    \[ x = -\frac{72}{2 \cdot -3} = 12 \]
+    Plugging this back into the height function to find the maximum height:
+    \[ y = -3(12)^2 + 72(12) + 70 = -432 + 864 + 70 = 502 \]
+    Thus, Nari should give her plant 12 oz of water per week to maximize its height, which will be 502 mm.
+
+    Alternatively, we can find the vertex also by looking at where the dertivative is zero:
+    \[ \frac{dy}{dx} = -6x + 72 \]
+    Setting the derivative to zero:
+    \[ -6x + 72 = 0 \]
+    \[ x = 12 \]
+    Plugging this back into the height function gives the same maximum height of 502 mm.
+
+    \medskip
+
+    \noindent 3. The 3D plot of the height function $f(x_1, x_2) = \exp(-(x_1 - 2)^2 - (x_2 - 1)^2)$ shows a peak at the point $(x_1, x_2) = (2, 1)$. See the plot at the end of this PDF.This is because the exponential function reaches its maximum value of 1 when the exponent is zero, which occurs when both $(x_1 - 2)^2$ and $(x_2 - 1)^2$ are zero. Therefore, the values of $x_1$ and $x_2$ that maximize plant height are $x_1 = 2$ oz of water and $x_2 = 1$ hour of sunlight. This point yields a global maximum since the exponential function is always positive and approaches zero as we move away from this point in any direction.
+
 \end{solution}
+\end{mdframed}
 
 \newpage 
 
@@ -163,9 +258,42 @@ In this class, one of our main focuses is to model the unexpected variations in 
 
 \newpage
 
+\begin{mdframed}[backgroundcolor=blue!10, linewidth=1pt]
 \begin{solution}
-	Your solution here.
+    \textbf{Problem 3}: \\
+    1a. The Gaussian distribution may not be appropriate for size and weight is because they may also yield negative values, which is not possible in real life. Something else could be that the distribution may be skewed or discreet, which the Gaussian distribution does not capture with this continuous and symmetric noise. \\
+    1b. The empirical estimate of the most likely combination of size and weight of a package is around (120, 4) because that's the given $\mu$ of the distribution. The theoretical value also centers around (120, 4) as well, so they are very close. The highest density values in the histogram are centering around that point (see the end of this PDF for the plot). \\
+
+    \medskip
+
+    \noindent 2. The two PDF plots show that as $S$ increases, the crest of the graph shifts to the right, which the distribution of $W$ also follows $S$ as it increases. This indicates that $S$ and $W$ are positively correlated, which makes sense because larger packages tend to be heavier. (see the end of this file for the plots).
+
+    \medskip
+
+    \noindent 3. We can compute $\mathbb{E}(T)$ and $\mathrm{Var}(T)$ using the properties of expectation and variance:
+    \[\mathbb{E}(T) = \mathbb{E}(60 + 0.6W + 0.2S + \epsilon) = 60 + 0.6\mathbb{E}(W) + 0.2\mathbb{E}(S) + \mathbb{E}(\epsilon)\]
+    Given that $\mathbb{E}(W) = 4$, $\mathbb{E}(S) = 120$, and $\mathbb{E}(\epsilon) = 0$, we have:
+    \[\mathbb{E}(T) = 60 + 0.6(4) + 0.2(120) + 0 = 60 + 2.4 + 24 = 86.4\]
+    \[\mathrm{Var}(T) = \mathrm{Var}(60 + 0.6W + 0.2S + \epsilon) = \mathrm{Var}(0.6W) + \mathrm{Var}(0.2S) + \mathrm{Var}(\epsilon)\]
+    Since $W$ and $S$ are independent, we can compute their variances using the covariance matrix information and the variance of $\epsilon$ given above:
+    \[\mathrm{Var}(W) = 1.5, \quad \mathrm{Var}(S) = 1.5, \quad \mathrm{Var}(\epsilon) = 5\]
+    Thus:
+    \[\mathrm{Var}(T) = (0.6)^2(1.5) + (0.2)^2(1.5) + 5 = 0.54 + 0.06 + 5 = 5.6\]
+
+    \medskip
+
+    \noindent 4. Conditional on $N=n$, the number of fragile packages that come in today follows a \textbf{Binomial distribution} because they are independent trials that come in with two possible outcomes (fragile or not fragile) and a fixed number of trials. The PMF is given by:
+    \[ P(X = k | N = n) = \binom{n}{k} p^k (1-p)^{n-k} \]
+    where $p$ is the probability that a package is fragile.
+
+    \medskip
+
+    \noindent 5a. See the code displayed in the attached Jupyter Notebook file for the function to simulate draws from the distribution of $T^*$. \\
+    \noindent 5b. Using the function, the empirical estimate of the mean of $T^*$ is approximately 6234 seconds, and the standard deviation is approximately 706 seconds (see the supporting Jupyter Notebook for the code and results, and the end of this PDF for the plot).
+    
+
 \end{solution} 
+\end{mdframed}
 
 \newpage 
 
@@ -199,8 +327,132 @@ In this class, we will bridge theory and practice through implementing the metho
 
 \end{problem}
 
+\begin{mdframed}[backgroundcolor=blue!10, linewidth=1pt]
 \begin{solution}
-	Your solution here.
+	\textbf{Problem 4}:
+
+    \noindent 1. The original code read the data horizontally, which caused the variables to not be read correctly (single row instead of columns). The fixed code should read:
+\begin{verbatim}
+data = pd.read_csv("data/points.csv").values
+x = data[:, 0]
+y = data[:, 1]
+\end{verbatim}
+
+There does seem to be a clear linear trend in the data (see the end of this PDF for the plot).
+
+    \medskip
+
+    \noindent 2. Steve's code for $\texttt{X}$ used $\texttt{np.hstack}$, which stacks arrays in sequence horizontally (column-wise). However, since \texttt{x} is a 1D array, you need to reshape it correctly, otherwise the hstack will not work as intended and does some weird combination on one column that is not intented (something like (2n, )) instead of (n, 2). The fixed code should read:
+\begin{verbatim}
+intercept = np.ones((x.shape[0], 1))
+x_col = x.reshape(-1, 1)
+X = np.hstack([intercept, x_col])
+\end{verbatim}
+After fixing the code, \texttt{y.shape} is (100,) and \texttt{X.shape} is (100, 2). There is no second coordinate in the output for \texttt{y.shape} because \texttt{y} is a 1D array representing the target values, while \texttt{X} is a 2D array representing the feature matrix with two columns (intercept and x-coordinates).
+
+    \medskip
+
+    \noindent 3. The shape of $\bm{\hat w}$ should be (2, ) because there are two parameters to estimate: the intercept and the slope of the line. They can be treated as $w_0$ and $w_1$ in the vector $\bm{w}$.
+
+    \medskip
+
+    \noindent 4. The issues in Steve's code are several places of the \texttt{fit} and \texttt{predict} functions. Firstly in the \texttt{fit} function, the matrix multiplication is not done correctly. It should use the \texttt{@} operator for matrix multiplication. It should also assign the result to \texttt{self.w}. Secondly, in the \texttt{predict} function, the parameter and the return statement both missed the self reference. The fixed code should read:
+\begin{verbatim}
+class LinearRegression:
+    def __init__(self):
+        self.w = None
+
+    def fit(self, X, y):
+        self.w = np.linalg.inv(X.T @ X) @ X.T @ y
+        return self.w
+
+    def predict(self, X):                       
+        return X @ self.w
+\end{verbatim}
+
+The plot of the fitted line is at the end of this PDF.
+
+    \medskip
 \end{solution}
+\end{mdframed}
+
+\begin{mdframed}[backgroundcolor=blue!10, linewidth=1pt]
+\begin{solution}
+    \textbf{Problem 4 (Continued)}: \\
+    \noindent 5. The vectorized MSE can be computed using the following mathematical expression:
+    \[\text{MSE} = \frac{1}{n} (\bm{y} - \hat{\bm{y}})^\top (\bm{y} - \hat{\bm{y}})\]
+    The vectorized code for computing MSE should read:
+\begin{verbatim}
+def mean_squared_error(y, y_pred):
+    n = y.shape[0]
+    mse = np.sum((y - y_pred) ** 2) / n
+    return mse
+\end{verbatim}
+Alternatively even without vectors, it can also be computed as:
+\begin{verbatim}
+def mean_squared_error(y, y_pred):
+    mse = np.mean((y - y_pred)**2)
+    return mse
+\end{verbatim}
+\end{solution}
+\end{mdframed}
+
+\newpage
+
+\begin{figure}[p]
+    \centering
+
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img_output/hw0_p2_1.png}
+        \caption{Plot for Problem 2, part 1}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img_output/hw0_p2_3.png}
+        \caption{Histogram for Problem 2, part 3}
+    \end{minipage}
+
+    \vspace{1.5em}
+
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img_output/hw0_p3_1b.png}
+        \caption{Histogram for Problem 3, part 1b}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.55\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img_output/hw0_p3_2.png}
+        \caption{PDF plot for Problem 3, part 2}
+    \end{minipage}
+
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img_output/hw0_p3_5b.png}
+        \caption{Histogram of T* for Problem 3, part 5b}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img_output/hw0_p4_1.png}
+        \caption{Plot of data points for Problem 4, part 1}
+    \end{minipage}
+
+    \vspace{1.5em}
+
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img_output/hw0_p4_4.png}
+        \caption{Plot of fitted line for Problem 4, part 4}
+    \end{minipage}
+
+\end{figure}
 
 \end{document}

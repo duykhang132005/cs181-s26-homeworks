@@ -179,9 +179,88 @@ dictates how quickly the kernel decays).
 
 \newpage
 
+\begin{mdframed}[backgroundcolor=blue!10, linewidth=1pt]
 \begin{solution}
-	Your solution here.
-\end{solution}
+  \textbf{Problem 1}: \\
+    \begin{enumerate}
+    \item (a) The fits become smoother as $k$ increases. For $k=1$, the fit is very jagged and closely follows the training data points, which leads to overfitting. For $k=3$, the fit is smoother and captures the general trend of the data while still being responsive to local variations (though still somewhat overfitting). For $k=N-1$, the fit is very smooth and essentially averages all the training data points, which can lead to underfitting as it does not capture local patterns in the data at all.
+    
+    \begin{center}
+        \includegraphics[width=.8\textwidth]{img_output/p1.1a.png}
+    \end{center}
+    
+    (b) The MSE values for each $k$ are as follows:
+
+    - For $k=1$: MSE = 1.74
+
+    - For $k=3$: MSE = 3.89
+
+    - For $k=N-1$: MSE = 9.53
+    
+    The model with $k=1$ yields the lowest MSE, basically because it's so biased to the data and is essentially overfitting everywhere.
+    \item (a) See the plot below:
+    \begin{center}
+      \includegraphics[width=.8\textwidth]{img_output/p1.2a.png}
+    \end{center}
+    The presence of $\tau$ controls the "smoothness" of the regrression. Looking at the three cases, we have a really small, medium, and large value for $\tau$:
+    
+    - In the small case, the small $\tau$ makes the kernel decay very quickly, resulting in the consideration of points super close to $x*$, leading to a spiky plot with overfitting and passing through every point.
+
+    - In the medium case, the medium $\tau$ is easing from the rapid decay a bit, showing a little bit less variance on the individual points and capturing less of the noise. It seems very responsive to the fluctuations in the graph right now, so maybe increasing it a bit more would make a better generalization of the data.
+
+    - In the high case, this is considerably underfitting with the $\tau$ value because of the need to average many points all together, leading to the line being much more flat (and seeming like a nice curve, but actually heavily biased).
+
+    (b) The MSE over a test set $\mathcal{D}_{\text{test}} = \{(x'_m, y'_m)\}_{m=1}^M$ is defined as:
+    \begin{equation}
+      MSE(\tau) = \frac{1}{M} \sum_{m=1}^{M} (y'_m - f_\tau(x'_m))^2
+    \end{equation}
+
+    Given the definition of the kernel-based regressor $f_\tau(x^*)$ using $\mathcal{D}_{\text{train}} = \{(x_n, y_n)\}_{n=1}^N$:
+    \begin{equation}
+      f_\tau(x^*) = \frac{\sum_{n=1}^{N} K_\tau(x_n, x^*) y_n}{\sum_{n=1}^{N} K_\tau(x_n, x^*)}
+    \end{equation}
+
+    By substituting the regressor expression $f_\tau(x'_m)$ into the MSE formula, we obtain the expression as a function of the training and test sets:
+    \begin{equation}
+      MSE = \frac{1}{M} \sum_{m=1}^{M} \left( y'_m - \frac{\sum_{n=1}^{N} K_\tau(x_n, x'_m) y_n}{\sum_{n=1}^{N} K_\tau(x_n, x'_m)} \right)^2
+    \end{equation}
+
+    (c) The computed MSE are as follows: 
+
+    - For $\tau$ = 1: 1.95
+
+    - For $\tau$ = 50: 1.86
+
+    - For $\tau$ = 2500: 8.33
+
+    Between them, the medium case (50) works best with the lowest MSE because it optimizes the bias-variance tradeoff. Choosing to go with the smallest possible $\tau$ will always minimize MSE, but it will fail to capture the trend of the graph because we're fully overfitting and heavily limiting the predictive capability of the model. Any new data will be off from predictions because we are heavily varied.
+
+    Using $D_{\text{train}}$ would minimize the MSE, but this would perfectly interpolate the training data which causes $\tau \rightarrow 0$ to give an MSE of 0, causing the same issues noted above with overfitting.
+
+  (d) Their complexities are as follows:
+
+      \begin{itemize}
+          \item \textbf{Space Complexity:} For both models, the space complexity is $O(N)$. Since there is no "training" phase that compresses the data into a fixed number of parameters (like in linear regression), the entire training set $\mathcal{D}_{\text{train}}$ must be stored in memory to make future predictions. Thus, the model size grows linearly with the size of the training set $N$.
+          
+          \item \textbf{Time Complexity:} To make a single prediction for an input $x^*$, both algorithms require $O(N)$ computations. 
+          \begin{itemize}
+              \item In \textbf{kNN}, one must calculate the distance between $x^*$ and all $N$ training points to identify the $k$ nearest neighbors.
+              \item In \textbf{Kernel Regression}, one must evaluate the kernel $K_\tau(x_n, x^*)$ for all $n=1, \dots, N$ to compute the weighted average.
+          \end{itemize}
+          Since there is no compounding step when doing these calculations, the number of computations required to make a prediction increases linearly as the training set $N$ grows.
+      \end{itemize}
+
+  (e) As $\tau \to 0$, the kernel $K_\tau(x_n, x^*)$ becomes infinitely "peaked." If $x^*$ is exactly equal to a training point $x_i$, $K_\tau(x_i, x^*)$ approaches 1 while all other $K_\tau(x_{n \neq i}, x^*)$ approach 0. If $x^*$ is not a training point, the kernel that decays the slowest will dominate the sum. 
+
+    The exact form of the limit is:
+    \begin{equation}
+        \lim_{\tau \to 0} f_\tau(x^*) = y_i \quad \text{where } i = \text{arg min}_n (x_n - x^*)^2
+    \end{equation}
+    
+    As the lengthscale goes to zero, the kernel regressor recovers the \textbf{1-Nearest Neighbor (1-NN)} estimator. The prediction at $x^*$ simply becomes the label $y_n$ of the training point $x_n$ that is spatially closest to it. It behaves something like a smaller and smaller window of points to consider, and so the smallest possible window will take into account the only closest point, hence the 1-NN.
+    \end{enumerate}
+  \end{solution}
+\end{mdframed}
 
 \newpage
 
@@ -190,12 +269,12 @@ dictates how quickly the kernel decays).
 % Problem 2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{problem}[Geometric Least Squares, 20pts]
-    Linear regression can be understood using geometric intuition in $\mathbb{R}^n$. The design matrix $\mathbf X \in \mathbb{R}^{N\times D}$, with $N > D$, spans a subspace $C(\mathbf X)$, the column space of $\mathbf X$ (referred to in lecture as column span) which is a subspace of $\mathbb{R}^N$. If you wish to review the concept of a column space, consider visiting Section 0 notes. \\
+    Linear regression can be understood using geometric intuition in $\mathbb{R}^n$. The design matrix $\mathbf X \in \mathbb{R}^{N\times D}$ spans a subspace $C(\mathbf X)$, the column space of $\mathbf X$ (referred to in lecture as column span) which is a subspace of $\mathbb{R}^N$. If you wish to review the concept of a column space, consider visiting Section 0 notes. \\
     
     \noindent Fitting by linear regression, sometimes called \textit{ordinary least-squares} (OLS), is just projecting the observation vector $\mathbf y \in \mathbb{R}^N$ orthogonally onto that subspace. Lecture 2 slides provide a good graphic to visualize this, see the slide titled ``Geometric Interpretation.'' From lecture, we also learned that $\hat {\mathbf y}$ lives in $C(\mathbf X)$ and the residual $\mathbf r = {\mathbf y} - \hat {\mathbf y}$ lives in the orthogonal complement.
 
     \begin{enumerate}
-    \item Let $\mathbf X \in \mathbb{R}^{N\times D}$ have full column rank $d$ and $\mathbf y \in \mathbb{R}^N$. Let the OLS estimator be $\mathbf w^*=(\mathbf X^\top \mathbf X)^{-1} X^\top \mathbf y$ and the fitted vector $\mathbf{\hat{y}} = \mathbf X \mathbf w^*$. Prove that $\hat {\mathbf y}$ is the \textit{orthogonal projection} of $y$ onto $C(\mathbf X)$. In other words, show that $\hat {\mathbf y} \in C(\mathbf X)$ and $\mathbf y - \hat {\mathbf y}$ is orthogonal to $C(\mathbf X)$. \textit{Hint: To show orthogonality, look at the gradient of $\mathcal L$, the loss, with respect to $\mathbf w$}.
+    \item Let $\mathbf X \in \mathbb{R}^{N\times D}$ have full column rank $d$ and $\mathbf y \in \mathbb{R}^N$. Let the OLS estimator be $\mathbf w^*=(\mathbf X^\top \mathbf X)^{-1} X^\top \mathbf y$ and the fitted vector $\mathbf y = \mathbf X \mathbf w^*$. Prove that $\hat {\mathbf y}$ is the \textit{orthogonal projection} of $y$ onto $C(\mathbf X)$. In other words, show that $\hat {\mathbf y} \in C(\mathbf X)$ and $\mathbf y - \hat {\mathbf y}$ is orthogonal to $C(\mathbf X)$. \textit{Hint: To show orthogonality, look at the gradient of $\mathcal L$, the loss, with respect to $\mathbf w$}.
 
     \item Prove that among all vectors in $C(\mathbf X)$, the fitted vector $\hat {\mathbf y}$ minimizes the Euclidean distance to $\mathbf y$. In other words, that for every vector $\mathbf v \in C(\mathbf X)$:
     \begin{equation*}
@@ -224,9 +303,75 @@ dictates how quickly the kernel decays).
 
 \newpage
 
+\begin{mdframed}[backgroundcolor=blue!10, linewidth=1pt]
 \begin{solution}
-	Your solution here.
+  \textbf{Problem 2:} \\
+  
+    \begin{enumerate}
+    \item \textbf{Proof: $\hat{\mathbf{y}}$ is the orthogonal projection of $\mathbf{y}$ onto $C(\mathbf{X})$}
+    
+    First, we show $\hat{\mathbf{y}} \in C(\mathbf{X})$. By definition, $\hat{\mathbf{y}} = \mathbf{X}\mathbf{w}^*$. Since $\hat{\mathbf{y}}$ is expressed as a linear combination of the columns of $\mathbf{X}$, it must lie in the column space $C(\mathbf{X})$.
+    
+    Next, we show that the residual $\mathbf{r} = \mathbf{y} - \hat{\mathbf{y}}$ is orthogonal to $C(\mathbf{X})$. We consider the gradient of the loss function $\mathcal{L}(\mathbf{w}) = \|\mathbf{y} - \mathbf{X}\mathbf{w}\|^2_2$:
+    \begin{equation}
+        \nabla_{\mathbf{w}} \mathcal{L} = -2\mathbf{X}^\top(\mathbf{y} - \mathbf{X}\mathbf{w})
+    \end{equation}
+    At the optimal solution $\mathbf{w}^*$, the gradient must be zero:
+    \begin{equation}
+        -2\mathbf{X}^\top(\mathbf{y} - \mathbf{X}\mathbf{w}^*) = 0 \implies \mathbf{X}^\top(\mathbf{y} - \hat{\mathbf{y}}) = 0
+    \end{equation}
+    The equation $\mathbf{X}^\top(\mathbf{y} - \hat{\mathbf{y}}) = 0$ implies that the vector $(\mathbf{y} - \hat{\mathbf{y}})$ is orthogonal to every column of $\mathbf{X}$. Since the columns of $\mathbf{X}$ span $C(\mathbf{X})$, the residual is orthogonal to the entire subspace $C(\mathbf{X})$.
+
+    \item \textbf{Proof: $\hat{\mathbf{y}}$ minimizes Euclidean distance to $\mathbf{y}$}
+    
+    Let $\mathbf{v}$ be any vector in $C(\mathbf{X})$. We can write the distance from $\mathbf{y}$ to $\mathbf{v}$ as:
+    \begin{equation}
+        \|\mathbf{y} - \mathbf{v}\|^2_2 = \|(\mathbf{y} - \hat{\mathbf{y}}) + (\hat{\mathbf{y}} - \mathbf{v})\|^2_2
+    \end{equation}
+    Since $\hat{\mathbf{y}} \in C(\mathbf{X})$ and $\mathbf{v} \in C(\mathbf{X})$, their difference $(\hat{\mathbf{y}} - \mathbf{v})$ is also in $C(\mathbf{X})$. From Part 1, we know $(\mathbf{y} - \hat{\mathbf{y}}) \perp C(\mathbf{X})$, so $(\mathbf{y} - \hat{\mathbf{y}}) \perp (\hat{\mathbf{y}} - \mathbf{v})$. By the Pythagorean Theorem:
+    \begin{equation}
+        \|\mathbf{y} - \mathbf{v}\|^2_2 = \|\mathbf{y} - \hat{\mathbf{y}}\|^2_2 + \|\hat{\mathbf{y}} - \mathbf{v}\|^2_2
+    \end{equation}
+    Because $\|\hat{\mathbf{y}} - \mathbf{v}\|^2_2 \geq 0$ for all $\mathbf{v}$, it follows that $\|\mathbf{y} - \mathbf{v}\|^2_2 \geq \|\mathbf{y} - \hat{\mathbf{y}}\|^2_2$. Thus, $\hat{\mathbf{y}}$ is the vector in $C(\mathbf{X})$ closest to $\mathbf{y}$.
+
+    \item \textbf{Properties of the Projection Matrix $\mathbf{P} = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$}
+    
+    \begin{itemize}
+    \item \textbf{Symmetry:} We show that $\mathbf{P}^\top = \mathbf{P}$. Using the property that $(\mathbf{AB})^\top = \mathbf{B}^\top\mathbf{A}^\top$:
+    \begin{align*}
+        \mathbf{P}^\top &= \left( \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top \right)^\top \\
+        &= (\mathbf{X}^\top)^\top \left( (\mathbf{X}^\top\mathbf{X})^{-1} \right)^\top \mathbf{X}^\top \\
+        &= \mathbf{X} \left( (\mathbf{X}^\top\mathbf{X})^\top \right)^{-1} \mathbf{X}^\top
+    \end{align*}
+    Since $\mathbf{X}^\top\mathbf{X}$ is symmetric ($(\mathbf{X}^\top\mathbf{X})^\top = \mathbf{X}^\top\mathbf{X}$), its inverse is also symmetric. Thus:
+    \begin{equation*}
+        \mathbf{P}^\top = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top = \mathbf{P}
+    \end{equation*}
+
+    \item \textbf{Idempotence:} We show that $\mathbf{P}^2 = \mathbf{P}$. Multiplying the matrix by itself:
+    \begin{align*}
+        \mathbf{P}^2 &= \left( \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top \right) \left( \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1} \mathbf{X}^\top \right) \\
+        &= \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1} \underbrace{(\mathbf{X}^\top\mathbf{X}) (\mathbf{X}^\top\mathbf{X})^{-1}}_{\mathbf{I}} \mathbf{X}^\top \\
+        &= \mathbf{X} \mathbf{I} (\mathbf{X}^\top\mathbf{X})^{-1} \mathbf{X}^\top \\
+        &= \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top = \mathbf{P}
+    \end{align*}
+
+    \item \textbf{Rank/Trace:} Since $\mathbf{P}$ is idempotent, its rank is equal to its trace ($\text{rank}(\mathbf{P}) = \text{tr}(\mathbf{P})$) as the problem hinted. Alternatively, to find the trace, we use the cyclic property (and I found this property online, then derived off of it) $\text{tr}(\mathbf{ABC}) = \text{tr}(\mathbf{BCA})$:
+    \begin{align*}
+        \text{tr}(\mathbf{P}) &= \text{tr}\left( \mathbf{X} \left[ (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top \right] \right) \\
+        &= \text{tr}\left( \left[ (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top \right] \mathbf{X} \right) \\
+        &= \text{tr}\left( (\mathbf{X}^\top\mathbf{X})^{-1} (\mathbf{X}^\top\mathbf{X}) \right) \\
+        &= \text{tr}(\mathbf{I}_d) = d
+    \end{align*}
+    Because $\mathbf{P}$ acts like the identity matrix here, $\text{rank}(\mathbf{P}) = \text{tr}(\mathbf{P}) = d$.
+\end{itemize}
+
+    \item \textbf{Residual Plot Interpretation}
+    
+    A parabolic (U-shaped) pattern in a residual plot indicates a \textbf{non-linear relationship} that the linear model has failed to capture. This suggests the presence of a quadratic trend in the data. To address this, one should perform a \textbf{basis expansion} to allow the model to fit the underlying curvature. This expands the column space of the design matrix to include quadratic terms, enabling the model to capture the non-linear relationship and thus reducing the systematic pattern in the residuals.
+    \end{enumerate}
 \end{solution}
+\end{mdframed}
 
 \newpage
 
@@ -281,9 +426,48 @@ dictates how quickly the kernel decays).
 
 \newpage
 
+\begin{mdframed}[backgroundcolor=blue!10, linewidth=1pt]
 \begin{solution}
-	Your solution here.
+  \textbf{Problem 3:} \\
+  \begin{enumerate}
+    \item Below are the four plots for the fitted regression line for each basis against a scatter plot of the training data:
+    \begin{center}
+        \includegraphics[width=.8\textwidth]{img_output/p3.1.png}
+    \end{center}
+    \item The MSE values for each basis regression are as follows:
+    
+    - MSE for Basis (a): 7.9559. This seems to underfit the data as the degree is still quite low to fully capture the fluctuations in the data towards the middle values.
+
+    - MSE for Basis (b): 8.7081. This is even more udnerfitting than (a) because it appears to be too generallized and is not responsive enough to the fluctuations in the data. 
+
+    - MSE for Basis (c): 5.9670. This is the best fit of the three so far, as it seems to be capturing following the data quite well, but still general enough to not be overfitting.
+
+    - MSE for Basis (d): 58.9367. This is a clear case of overfitting, as the model is so flexible that it is capturing the noise in the data, leading to a very high MSE on the test set. It makes sense in a Fourier way to cover every data point, but not interpretable at all for generalization.
+
+    \item The basis transformations $\phi$ serve to map the original input data into a higher-dimensional feature space, which increases the expressivity of the model. This is helpful because it allows a linear regression framework to capture complex, non-linear relationships while remaining linear in the parameters $w$. By doing so, we can still utilize the computationally efficient closed-form solution $(\Phi^\top \Phi)^{-1} \Phi^\top \mathbf{y}$ to find the optimal model, even though the resulting fit is non-linear relative to the original input $x$. More features means more flexibility to be expressive, but obviously not too much, otherwise we run into overfitting issues.
+    
+    \item The time and space complexity is as follows:
+
+\begin{itemize}
+    \item \textbf{Space Complexity:} Linear basis regression is a parametric method. Once the model is trained, we only need to store the weight vector $\mathbf{w} \in \mathbb{R}^D$, where $D$ is the number of basis functions. Therefore, the space complexity is $O(D)$. Unlike kNN or Kernel Regression, the size of the stored model \textbf{does not change} with the size of the training set $N$.
+    
+    \item \textbf{Time Complexity (Prediction):} To make a prediction for a new input $x^*$, we must compute the $D$ basis transformations and perform a dot product $\phi(x^*)^\top \mathbf{w}$. This requires $O(D)$ operations. Notably, the number of computations \textbf{does not depend on $N$}, making this model significantly more efficient for inference on large datasets than memory-based methods.
+\end{itemize}
+
+    Overall, the theme here is that the parametric nature of linear regression with basis allows for a fixed-size model that is independent of the training set size, leading to efficient storage and fast predictions, while kNN and Kernel Regression require storing the entire training set and have prediction times that grow with $N$.
+
+    \item The fundamental difference between Linear Regression and kNN/Kernel Regression is the distinction between parametric and non-parametric modeling.
+
+\begin{itemize}
+    \item \textbf{Computational Efficiency:} Linear regression is significantly more efficient for large-scale inference. Since it only stores a weight vector $\mathbf{w} \in \mathbb{R}^D$, its prediction time is $O(D)$ and does not grow with the training set size $N$. Conversely, kNN and Kernel regression require $O(ND)$ time (we had $D=1$ for part 1) for prediction because they must consult every training point to compute a result.
+    \item \textbf{Memory Requirements:} Linear basis regression has a constant space complexity of $O(D)$ regardless of $N$. Non-parametric methods like kNN have a space complexity of $O(ND)$, as the entire dataset must be stored to perform predictions.
+    \item \textbf{Model Flexibility:} While kNN and Kernel regression are highly flexible and can adapt to complex patterns without explicit feature engineering, Linear basis regression is restricted by the expressivity of the chosen basis functions $\phi$.
+\end{itemize}
+
+    Overall, what's better or worse depends on the goal of what we're trying to do. If we want runtime efficiency and a compact model, linear regression with an appropriate basis is often preferable, but we need to choose a good set of basis functions, otherwise the model may not fit well. If we want maximum flexibility and are less concerned about computational costs, non-parametric methods may be more suitable. In practice, one might use the multiple regression functions to compare performance and select the best model based on validation metrics or to ensemble them for improved predictions.
+  \end{enumerate}
 \end{solution}
+\end{mdframed}
 
 \newpage
 
@@ -337,17 +521,115 @@ dictates how quickly the kernel decays).
 
 \newpage
 
+\begin{mdframed}[backgroundcolor=blue!10, linewidth=1pt]
 \begin{solution}
-	Your solution here.
+  \textbf{Problem 4}: \\
+  \begin{enumerate}
+    \item \textbf{Proof: Maximizing the posterior likelihood is equivalent to minimizing $\mathcal{L}_{ridge}(\mathbf{w})$}
+    
+    We start with the posterior distribution of the weights given the data:
+    \begin{equation}
+        p(\mathbf{w} | \mathbf{X}, \mathbf{y}) = \frac{p(\mathbf{y} | \mathbf{X}, \mathbf{w})p(\mathbf{w})}{p(\mathbf{y} | \mathbf{X})}
+    \end{equation}
+    Since the denominator $p(\mathbf{y} | \mathbf{X})$ is independent of $\mathbf{w}$, maximizing the posterior is equivalent to maximizing the numerator $p(\mathbf{y} | \mathbf{X}, \mathbf{w})p(\mathbf{w})$. 
+    
+    Using the likelihood $y_n | \mathbf{x}_n, \mathbf{w} \sim \mathcal{N}(\mathbf{w}^\top\mathbf{x}_n, \sigma^2)$ and the prior $\mathbf{w} \sim \mathcal{N}(\mathbf{0}, \frac{\sigma^2}{\lambda}\mathbf{I})$ (where each data point is i.i.d.), we have:
+    \begin{equation}
+        p(\mathbf{y} | \mathbf{X}, \mathbf{w})p(\mathbf{w}) = \left( \prod_{n=1}^N \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(y_n - \mathbf{w}^\top\mathbf{x}_n)^2}{2\sigma^2}\right) \right) \cdot \frac{1}{\sqrt{(2\pi)^D |\frac{\sigma^2}{\lambda}\mathbf{I}|}} \exp\left(-\frac{\lambda}{2\sigma^2} ||\mathbf{w}||_2^2\right)
+    \end{equation}
+    Taking the log-posterior and dropping terms that do not depend on $\mathbf{w}$ because we only care about the numerator:
+    \begin{align*}
+        \log p(\mathbf{w} | \mathbf{X}, \mathbf{y}) &\propto \log p(\mathbf{y} | \mathbf{X}, \mathbf{w}) + \log p(\mathbf{w}) \\
+        &= -\frac{1}{2\sigma^2} \sum_{n=1}^N (y_n - \mathbf{w}^\top\mathbf{x}_n)^2 - \frac{\lambda}{2\sigma^2} ||\mathbf{w}||_2^2 + \text{const} \\
+        &= -\frac{1}{2\sigma^2} \left( ||\mathbf{y} - \mathbf{X}\mathbf{w}||_2^2 + \lambda ||\mathbf{w}||_2^2 \right) + \text{const}
+    \end{align*}
+    Maximizing this log-likelihood is equivalent to minimizing the negative of the expression. By scaling by the constant $\sigma^2$ (which does not change the argmin), we get:
+    \begin{equation}
+        \arg\max_{\mathbf{w}} p(\mathbf{w} | \mathbf{X}, \mathbf{y}) = \arg\min_{\mathbf{w}} \left( \frac{1}{2} ||\mathbf{y} - \mathbf{X}\mathbf{w}||_2^2 + \frac{\lambda}{2} ||\mathbf{w}||_2^2 \right)
+    \end{equation}
+    The right-hand side is exactly $\mathcal{L}_{ridge}(\mathbf{w})$. Thus, the maximizing the posterior likelihood is equivalent to minimizing the Ridge loss function.
+
+    \item To find the weight vector $\mathbf{w}^*$ that minimizes the Ridge loss function, we take the gradient of the loss with respect to $\mathbf{w}$ and set it to zero.
+  
+  Starting with the loss function:
+  \begin{equation}
+      \mathcal{L}_{ridge}(\mathbf{w}) = \frac{1}{2} ||\mathbf{y} - \mathbf{X}\mathbf{w}||_2^2 + \frac{\lambda}{2} ||\mathbf{w}||_2^2
+  \end{equation}
+  
+  Expanding the squared terms:
+  \begin{equation}
+      \mathcal{L}_{ridge}(\mathbf{w}) = \frac{1}{2} (\mathbf{y} - \mathbf{X}\mathbf{w})^\top(\mathbf{y} - \mathbf{X}\mathbf{w}) + \frac{\lambda}{2} \mathbf{w}^\top \mathbf{w}
+  \end{equation}
+  
+  Taking the gradient $\nabla_{\mathbf{w}}$:
+  \begin{align*}
+      \nabla_{\mathbf{w}} \mathcal{L}_{ridge}(\mathbf{w}) &= \nabla_{\mathbf{w}} \left( \frac{1}{2} \mathbf{y}^\top\mathbf{y} - \mathbf{w}^\top\mathbf{X}^\top\mathbf{y} + \frac{1}{2}\mathbf{w}^\top\mathbf{X}^\top\mathbf{X}\mathbf{w} + \frac{\lambda}{2}\mathbf{w}^\top\mathbf{w} \right) \\
+      &= -\mathbf{X}^\top\mathbf{y} + \mathbf{X}^\top\mathbf{X}\mathbf{w} + \lambda\mathbf{w}
+  \end{align*}
+  
+  Setting the gradient to the zero vector $\mathbf{0}$, we can end up comparing the two set of terms:
+  \begin{align*}
+      \mathbf{X}^\top\mathbf{X}\mathbf{w} + \lambda\mathbf{w} &= \mathbf{X}^\top\mathbf{y} \\
+      (\mathbf{X}^\top\mathbf{X} + \lambda\mathbf{I})\mathbf{w} &= \mathbf{X}^\top\mathbf{y}
+  \end{align*}
+  
+  Solving for $\mathbf{w}$, we obtain the closed-form solution:
+  \begin{equation}
+      \mathbf{w}^* = (\mathbf{X}^\top\mathbf{X} + \lambda\mathbf{I})^{-1} \mathbf{X}^\top\mathbf{y}
+  \end{equation}
+  This allows us to obtain the closed form for the maximized $\mathbf{w}^*$, with the presence of the regularization term $\lambda$ to minimize overfitting in $\mathcal{L}_{ridge}$.
+
+\item \textbf{Proof: Maximizing the posterior likelihood with a Laplace prior is equivalent to minimizing $\mathcal{L}_{lasso}(\mathbf{w})$ (similar to 4.1):}
+
+We start with the posterior distribution of the weights given the data:
+\begin{equation}
+    p(\mathbf{w} | \mathbf{X}, \mathbf{y}) = \frac{p(\mathbf{y} | \mathbf{X}, \mathbf{w})p(\mathbf{w})}{p(\mathbf{y} | \mathbf{X})}
+\end{equation}
+We maximize the numerator $p(\mathbf{y} | \mathbf{X}, \mathbf{w})p(\mathbf{w})$ since the denominator is independent of $\mathbf{w}$. 
+
+Using the Gaussian likelihood for i.i.d. observations and the Laplace prior given, $w_d \sim L\left(0, \frac{2\sigma^2}{\lambda}\right)$, where $p(w_d) = \frac{1}{2b} \exp\left(-\frac{|w_d|}{b}\right)$ with $b = \frac{2\sigma^2}{\lambda}$, we have:
+\begin{equation}
+    p(\mathbf{y} | \mathbf{X}, \mathbf{w})p(\mathbf{w}) = \left( \prod_{n=1}^N \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(y_n - \mathbf{w}^\top\mathbf{x}_n)^2}{2\sigma^2}\right) \right) \cdot \left( \prod_{d=1}^D \frac{1}{2b} \exp\left(-\frac{\lambda|w_d|}{2\sigma^2}\right) \right)
+\end{equation}
+Taking the natural logarithm and dropping constants that do not depend on $\mathbf{w}$:
+\begin{align*}
+    \log p(\mathbf{w} | \mathbf{X}, \mathbf{y}) &\propto \log p(\mathbf{y} | \mathbf{X}, \mathbf{w}) + \log p(\mathbf{w}) \\
+    &= -\frac{1}{2\sigma^2} \sum_{n=1}^N (y_n - \mathbf{w}^\top\mathbf{x}_n)^2 - \sum_{d=1}^D \frac{\lambda|w_d|}{2\sigma^2} + \text{const} \\
+    &= -\frac{1}{2\sigma^2} ||\mathbf{y} - \mathbf{X}\mathbf{w}||_2^2 - \frac{\lambda}{2\sigma^2} ||\mathbf{w}||_1 + \text{const}
+\end{align*}
+Maximizing the log-posterior is equivalent to minimizing its negative. By scaling the entire expression by the constant $\sigma^2$ (which does not change the argmin), we obtain:
+\begin{equation}
+    \arg\max_{\mathbf{w}} \log p(\mathbf{w} | \mathbf{X}, \mathbf{y}) = \arg\min_{\mathbf{w}} \left( \frac{1}{2} ||\mathbf{y} - \mathbf{X}\mathbf{w}||_2^2 + \frac{\lambda}{2} ||\mathbf{w}||_1 \right)
+\end{equation}
+The right-hand side is exactly the loss function $\mathcal{L}_{lasso}(\mathbf{w})$ as defined in the problem. Same way as going about this as 4.1, maximizing the posterior likelihood with this Laplace prior is equivalent to minimizing the Lasso loss function.
+
+\item The Lasso loss function $\mathcal{L}_{lasso}(\mathbf{w})$ includes an $L_1$ regularization term, which is not differentiable at zero. This non-differentiability arises because the $L_1$ norm involves the absolute value function, which ruins our approach to find a closed form solution by setting the gradient to zero. As a result, we have to find ways to numerically optimize like in number 5.
+
+\item The graph for this is below:
+
+\begin{center}
+    \includegraphics[width=.8\textwidth]{img_output/p4.5.png}
+\end{center}
+
+For MSE's, we have the following values:
+
+- Test MSE for lambda=1: 30.06
+
+- Test MSE for lambda=10: 15.62
+
+Errors are much lower than the unregularized basis (d) model, which had a test MSE of 58.94. The higher lambda has the lowest test MSE. The regularization term in Lasso helps to prevent overfitting by encouraging sparsity in the weight vector $\mathbf{w}$, which leads to better generalization on the test set. The graph also shows that the predictions with regularization are smoother and less sensitive to noise in the training data compared to the unregularized model, which is consistent with the observed reduction in test MSE. The model with $\lambda=10$ also seems to generalize and fit well with the overall trend of the data.
+
+\end{enumerate}
 \end{solution}
+\end{mdframed}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Name and Calibration
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 
-\textbf{Name}:
+\textbf{Name}: Khang Nguyen
 
-\textbf{Collaborators and Resources}: 
+\textbf{Collaborators and Resources}: Looked up a few things regarding derivation online for Rank/Trace in Problem 2. I did LaTeX in VSCode, which had in-line completions, but only after I laid out the core ideas and details already. It's moreso to format the LaTeX than helping with the problem.
 
 \end{document}
